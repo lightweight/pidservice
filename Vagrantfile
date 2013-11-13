@@ -75,7 +75,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #
   
   config.vm.provision :shell do |shell|
-    shell.inline = "mkdir -p /etc/puppet/modules;
+    shell.inline = "apt-get update;
+mkdir -p /etc/puppet/modules;
 if [ ! -d /etc/puppet/modules/apache ]; then puppet module install puppetlabs/apache; fi;
 if [ ! -d /etc/puppet/modules/mysql ]; then puppet module install puppetlabs/mysql; fi"
   end
