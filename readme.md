@@ -6,8 +6,8 @@ at http://localhost:8080/
 
 ## Initial setup
 
- * Add a box called 'base'
-   vagrant box add http://files.vagrantup.com/precise64.box
+ * Add a box called 'base' with Ubuntu 12.04 LTS.
+   vagrant box add base http://files.vagrantup.com/precise64.box
 
 ## Setting up a clone of an existing old-style 'shared core' site
 
