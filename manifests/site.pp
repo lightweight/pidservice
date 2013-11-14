@@ -26,7 +26,7 @@ mysql::db { 'vagrant':
   grant => ['ALL'],
   }
 
-package { ['php5-mysql', 'drush','htop','php5-gd']:
+package { ['php5-mysql', 'php-pear','htop','php5-gd','php5-curl','git']:
   ensure => present,
   }
 
@@ -40,4 +40,9 @@ File["/home/drupal"] -> File["/home/drupal/contrib"] -> File["/home/drupal/libra
 
 User <| title == "www-data" |> {
   groups +> 'vagrant',
+}
+
+exec { "/usr/bin/pear channel-discover pear.drush.org && /usr/bin/pear install drush/drush && /usr/bin/drush --version":
+  creates => "/usr/bin/drush",
+  require => Package["php-pear"],
 }
