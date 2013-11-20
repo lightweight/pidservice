@@ -81,10 +81,17 @@ if [ ! -d /etc/puppet/modules/apache ]; then puppet module install puppetlabs/ap
 if [ ! -d /etc/puppet/modules/mysql ]; then puppet module install puppetlabs/mysql; fi"
   end
 
-
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "manifests"
     puppet.manifest_file  = "site.pp"
+  end
+
+  if ENV.has_key?("solr")
+    config.vm.network :forwarded_port, guest: 8983, host: 8983
+    config.vm.provision :puppet do |puppet|
+      puppet.manifests_path = "manifests"
+      puppet.manifest_file  = "solr.pp"
+    end
   end
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles

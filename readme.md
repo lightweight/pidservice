@@ -40,6 +40,18 @@ For this example I will use the 'strongerchristchurch.org.nz', and assume that y
    cd /vagrant/public/sites/default
    drush cc all
 
+## Setting up a clone of a new 'single-core' style site
+
+ * Copy this repo somewhere. You need a seperate copy of the repo for each dev site
+ * Clone the Drupal site you want into ./public
+ * SSH into the vm
+    vagrant ssh
+ * Import a database dump
+    mysql -u root -p vagrant < dumpfile.sql
+ * Create the relevent settings files
+ * Clear the cache
+    drush cc all
+
 ## Details
 
 This set of puppet scripts:
@@ -48,3 +60,21 @@ This set of puppet scripts:
  * Forwards port 8080 to the VMs port 80
  * Creates a MySQL database called 'vagrant', with a user 'vagrant', password 'vagrant'
  * Adds the user 'www-data' to the group 'vagrant'
+
+## Solr
+
+You can install Apache Solr in your VM by running (after you have done 'vagrant up'):
+  
+  solr=true vagrant provision
+  
+This will:
+ * Install the OpenJDK JRE
+ * Download and unpack Solr 4.5.1 (the latest stable version at time of writing) to /opt/solr-4.5.1
+ * chown /opt/solr-4.5.1 to vagrant:vagrant
+ * Forward port 8983 to the VM
+ 
+To start Solr:
+ cd /opt/solr-4.5.1/example
+ java -jar start.jar --daemon &
+ 
+You can then access the Solr admin at http://localhost:8983/solr
