@@ -9,6 +9,32 @@ at http://localhost:8080/
  * Add a box called 'base' with Ubuntu 12.04 LTS.
    vagrant box add base http://files.vagrantup.com/precise64.box
 
+## Setting up a clone of a new 'single-core' style site
+
+ * Copy this repo somewhere. You need a seperate copy of the repo for each dev site
+    e.g. git clone git+ssh://git.catalyst.net.nz/git/private/vagrant-drupal.git vagrant-drupal-cera.govt.nz
+ * Clone the Drupal site you want into ./public
+    e.g. git clone git+ssh://git.catalyst.net.nz/git/private/drupal/cera.git public
+ * cd vagrant-drupal-cera.govt.nz
+ * Build the new machine instance. With multiple vagrant instances you may need to edit the Vagrant file to change port 8080 to (say) 8081.
+    vagrant up
+ * Provision PHP, Apache, MySQL, drush etc. using puppet.
+    vagrant provision
+ * SSH into the vm
+    vagrant ssh
+    cd /vagrant/public
+ * Create settings.db.php if needed.
+    Drupal 6:
+    <?php
+      $db_url = array();
+      $db_url['default'] = 'mysql://vagrant:vagrant@localhost/vagrant';
+      $db_prefix = ''
+ * Import a database dump
+    mysql -u root -p vagrant < dumpfile.sql
+ * Create the relevent settings files
+ * Clear the cache
+    drush cc all
+
 ## Setting up a clone of an existing old-style 'shared core' site
 
 For this example I will use the 'strongerchristchurch.org.nz', and assume that you have a .sql database dump (ie, drush sql-dump)
@@ -39,18 +65,6 @@ For this example I will use the 'strongerchristchurch.org.nz', and assume that y
    vagrant ssh
    cd /vagrant/public/sites/default
    drush cc all
-
-## Setting up a clone of a new 'single-core' style site
-
- * Copy this repo somewhere. You need a seperate copy of the repo for each dev site
- * Clone the Drupal site you want into ./public
- * SSH into the vm
-    vagrant ssh
- * Import a database dump
-    mysql -u root -p vagrant < dumpfile.sql
- * Create the relevent settings files
- * Clear the cache
-    drush cc all
 
 ## Details
 
