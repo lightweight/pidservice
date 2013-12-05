@@ -23,7 +23,7 @@ at http://localhost:8080/
  * SSH into the vm
     vagrant ssh
     cd /vagrant/public
- * Create settings.db.php if needed.
+ * Create settings.db.php if needed. (Warning: this method appears deprecated in Catalyst wiki.)
     Drupal 6:
     <?php
       $db_url = array();
@@ -34,10 +34,14 @@ at http://localhost:8080/
  * Create the relevent settings files
  * Clear the cache
     drush cc all
+ * Configure git:
+    git config --global user.name "Your name"
+    git config --global user.email foo@example.com
+    git config --global color.ui true
 
 ## Setting up a clone of an existing old-style 'shared core' site
 
-For this example I will use the 'strongerchristchurch.org.nz', and assume that you have a .sql database dump (ie, drush sql-dump)
+For this example I will use the 'strongerchristchurch.govt.nz', and assume that you have a .sql database dump (ie, drush sql-dump)
 
  * Copy this repo somewhere. You need a seperate copy of the repo for each dev site
  * Clone the drupal core into ./public. strongerchristchurch needs a 6.x core, so:
@@ -54,7 +58,7 @@ For this example I will use the 'strongerchristchurch.org.nz', and assume that y
  * Import a database dump
     mysql -u root -p vagrant < dumpfile.sql
  * Create a settings.php file (easiest way is to copy one off the existing install)
- * Create a settings.php.db file
+ * Create a settings.db.php file (Warning: this method appears deprecated in Catalyst wiki)
    <?php
 	$db_url = 'mysql://vagrant:vagrant@localhost/vagrant';
 	$db_prefix = '';
