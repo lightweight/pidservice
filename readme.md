@@ -16,6 +16,7 @@ at http://localhost:8080/
  * Clone the Drupal site you want into ./public
     e.g. git clone git+ssh://git.catalyst.net.nz/git/private/drupal/cera.git public
  * cd vagrant-drupal-cera.govt.nz
+ * Note that the Drupal files/ directory needs group write permissions to be writeable by Apache in the Vagrant vm.
  * Build the new machine instance. With multiple vagrant instances you may need to edit the Vagrant file to change port 8080 to (say) 8081.
     vagrant up
  * Provision PHP, Apache, MySQL, drush etc. using puppet.
