@@ -26,7 +26,7 @@ mysql::db { 'vagrant':
   grant => ['ALL'],
   }
 
-package { ['php5-mysql', 'php-pear','htop','php5-gd','php5-curl','git']:
+package { ['php5-mysql', 'php-pear','htop','php5-gd','php5-curl','php5-json','git']:
   ensure => present,
   }
 
