@@ -94,6 +94,13 @@ if [ ! -d /etc/puppet/modules/mysql ]; then puppet module install puppetlabs/mys
     end
   end
 
+  if ENV.has_key?("fedora")
+    config.vm.provision :puppet do |puppet|
+      puppet.manifests_path = "manifests"
+      puppet.manifest_file  = "fedora.pp"
+    end
+  end
+
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
   # path, and data_bags path (all relative to this Vagrantfile), and adding
   # some recipes and/or roles.

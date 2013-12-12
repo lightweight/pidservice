@@ -78,3 +78,12 @@ To start Solr:
  java -jar start.jar --daemon &
  
 You can then access the Solr admin at http://localhost:8983/solr
+
+## Fedora Commons
+
+I have added the Puppet instructions for setting up Fedora Commons[1] in fedora.pp
+To install these, vagrant up, then
+
+  fedora=true vagrant provision
+  
+[1] from https://wiki.wgtn.cat-it.co.nz/wiki/Fedora/Puppet
