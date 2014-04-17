@@ -35,8 +35,8 @@ class { 'postgresql::server': }
 #}
 
 postgresql::server::db { 'pidsvc':
-  user     => 'pidsvc',
-  password => postgresql_password('pidsvc', 'vagrant'),
+  user     => 'pidsvc-admin',
+  password => postgresql_password('pidsvc-admin', 'vagrant'),
 }
 
 file { "/etc/tomcat6/webapps":
@@ -45,16 +45,6 @@ file { "/etc/tomcat6/webapps":
   group   => tomcat6,
   mode    => 2750,
 }
-
-#postgresql::server::database_grant { 'pidsvc':
-#  privilege => 'ALL',
-#  db        => 'pidsvc',
-#  role      => 'pidsvc',
-#}
-
-#wget https://www.seegrid.csiro.au/subversion/PID/trunk/pidsvc/src/main/db/postgresql.sql
-#psql -d pidsvc -f postgresql.sql
-
 
 User <| title == "www-data" |> {
   groups +> 'vagrant',

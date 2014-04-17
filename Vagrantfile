@@ -20,6 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   config.vm.network :forwarded_port, guest: 80, host: 8086
+  config.vm.network :forwarded_port, guest: 8080, host: 8090
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -86,18 +87,25 @@ if [ ! -d /etc/puppet/modules/postgresql ]; then puppet module install puppetlab
     puppet.manifest_file  = "site.pp"
   end
 
-config.vm.provision :shell do |shell|
-  shell.inline = "cd /vagrant/public;
-  if [ ! -d /vagrant/public/PID ]; then git svn clone https://www.seegrid.csiro.au/subversion/PID/ -T trunk -b branches -t tags; fi;";
-end
+  config.vm.provision :shell do |shell|
+    shell.inline = "export TOMCAT_HOME='/var/lib/tomcat6';
+    if [ ! -d /etc/tomcat6/webapps/pidsvc-latest.war ]; then cd $TOMCAT_HOME/webapps;
+    wget https://cgsrv1.arrc.csiro.au/swrepo/PidService/jenkins/trunk/pidsvc-latest.war; chown -R tomcat6:tomcat6 $TOMCAT_HOME; fi;";
+  end
 
-config.vm.provision :shell do |shell|
-  shell.inline = "cd /etc/tomcat6/webapps;
-  if [ ! -d /vagrant/public/pidvc-latest ]; then wget https://cgsrv1.arrc.csiro.au/swrepo/PidService/jenkins/trunk/pidsvc-latest.war; fi;";
-end
+  config.vm.provision :shell do |shell|
+    shell.args = ENV['pgpass'];
+    shell.inline = "export PGPASSWORD=$1;
+    cd /vagrant/public;
+    if [ ! -d /home/vagrant/.pgpass ]; then echo 'localhost:5432:pidsvc:pidsvc-admin:vagrant' > /home/vagrant/.pgpass ; chown vagrant:vagrant /home/vagrant/.pgpass; chmod  0600 /home/vagrant/.pgpass; fi;
+    if [ ! -d /vagrant/public/PID ]; then git svn clone https://www.seegrid.csiro.au/subversion/PID/ -T trunk -b branches -t tags; fi;
+    echo 'createlang\n';
+    createlang -U pidsvc-admin -h localhost plpgsql pidsvc;
+    echo 'Importing sql\n';
+    psql -U pidsvc-admin  -h localhost -d pidsvc -f PID/pidsvc/src/main/db/postgresql.sql";
+  end
 
-#createlang plpgsql pidsvc
-#psql -d pidsvc -h localhost -f pidsvc/src/main/db/postgresql.sql
+#/etc/tomcat6/Catalina/localhost/pidsvc.xml
 
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
