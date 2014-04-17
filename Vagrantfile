@@ -19,7 +19,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
-  config.vm.network :forwarded_port, guest: 80, host: 8080
+  config.vm.network :forwarded_port, guest: 80, host: 8086
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -78,7 +78,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     shell.inline = "apt-get update;
 mkdir -p /etc/puppet/modules;
 if [ ! -d /etc/puppet/modules/apache ]; then puppet module install puppetlabs/apache; fi;
-if [ ! -d /etc/puppet/modules/mysql ]; then puppet module install puppetlabs/mysql; fi"
+if [ ! -d /etc/puppet/modules/postgresql ]; then puppet module install puppetlabs-postgresql; fi;"
   end
 
   config.vm.provision :puppet do |puppet|
@@ -86,20 +86,19 @@ if [ ! -d /etc/puppet/modules/mysql ]; then puppet module install puppetlabs/mys
     puppet.manifest_file  = "site.pp"
   end
 
-  if ENV.has_key?("solr")
-    config.vm.network :forwarded_port, guest: 8983, host: 8983
-    config.vm.provision :puppet do |puppet|
-      puppet.manifests_path = "manifests"
-      puppet.manifest_file  = "solr.pp"
-    end
-  end
+config.vm.provision :shell do |shell|
+  shell.inline = "cd /vagrant/public;
+  if [ ! -d /vagrant/public/PID ]; then git svn clone https://www.seegrid.csiro.au/subversion/PID/ -T trunk -b branches -t tags; fi;";
+end
 
-  if ENV.has_key?("fedora")
-    config.vm.provision :puppet do |puppet|
-      puppet.manifests_path = "manifests"
-      puppet.manifest_file  = "fedora.pp"
-    end
-  end
+config.vm.provision :shell do |shell|
+  shell.inline = "cd /etc/tomcat6/webapps;
+  if [ ! -d /vagrant/public/pidvc-latest ]; then wget https://cgsrv1.arrc.csiro.au/swrepo/PidService/jenkins/trunk/pidsvc-latest.war; fi;";
+end
+
+#createlang plpgsql pidsvc
+#psql -d pidsvc -h localhost -f pidsvc/src/main/db/postgresql.sql
+
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
   # path, and data_bags path (all relative to this Vagrantfile), and adding

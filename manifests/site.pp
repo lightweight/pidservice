@@ -15,34 +15,47 @@ apache::vhost { 'localhost':
 class {'apache::mod::php':}
 class {'apache::mod::rewrite':}
 
-class { '::mysql::server':
-  root_password    => 'vagrant',
+$packages = [
+             "git",
+             "git-svn",
+             "etckeeper",
+             "tomcat6",
+             "tomcat6-admin",
+             ]
+
+package { $packages:
+  ensure  => installed,
 }
 
-mysql::db { 'vagrant':
-  user => 'vagrant',
-  password => 'vagrant',
-  host => 'localhost',
-  grant => ['ALL'],
-  }
+class { 'postgresql::server': }
 
-package { ['php5-mysql', 'php-pear','htop','php5-gd','php5-curl','php5-json','git']:
-  ensure => present,
-  }
+#postgresql::server::role { 'vagrant':
+#  createdb => true,
+#  password_hash => postgresql_password('vagrant', 'vagrant'),
+#}
 
-file { ["/home/drupal","/home/drupal/contrib","/home/drupal/libraries"]:
-  ensure => 'directory',
-  owner => 'www-data',
-  group => 'www-data',
+postgresql::server::db { 'pidsvc':
+  user     => 'pidsvc',
+  password => postgresql_password('pidsvc', 'vagrant'),
 }
 
-File["/home/drupal"] -> File["/home/drupal/contrib"] -> File["/home/drupal/libraries"]
+file { "/etc/tomcat6/webapps":
+  ensure  => directory,
+  owner   => tomcat6,
+  group   => tomcat6,
+  mode    => 2750,
+}
+
+#postgresql::server::database_grant { 'pidsvc':
+#  privilege => 'ALL',
+#  db        => 'pidsvc',
+#  role      => 'pidsvc',
+#}
+
+#wget https://www.seegrid.csiro.au/subversion/PID/trunk/pidsvc/src/main/db/postgresql.sql
+#psql -d pidsvc -f postgresql.sql
+
 
 User <| title == "www-data" |> {
   groups +> 'vagrant',
-}
-
-exec { "/usr/bin/pear channel-discover pear.drush.org && /usr/bin/pear install drush/drush && /usr/bin/drush --version":
-  creates => "/usr/bin/drush",
-  require => Package["php-pear"],
 }
