@@ -76,10 +76,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #
   
   config.vm.provision :shell do |shell|
-    shell.inline = "apt-get update;
-mkdir -p /etc/puppet/modules;
-if [ ! -d /etc/puppet/modules/apache ]; then puppet module install puppetlabs/apache; fi;
-if [ ! -d /etc/puppet/modules/postgresql ]; then puppet module install puppetlabs-postgresql; fi;"
+    shell.inline = "
+      apt-get update;
+      mkdir -p /etc/puppet/modules; 
+      if [ ! -d /etc/puppet/modules/apache ]; then 
+        puppet module install puppetlabs/apache; 
+      fi;
+      if [ ! -d /etc/puppet/modules/postgresql ]; then 
+        puppet module install puppetlabs-postgresql; 
+      fi;"
   end
 
   config.vm.provision :puppet do |puppet|
@@ -88,21 +93,42 @@ if [ ! -d /etc/puppet/modules/postgresql ]; then puppet module install puppetlab
   end
 
   config.vm.provision :shell do |shell|
-    shell.inline = "export TOMCAT_HOME='/var/lib/tomcat6';
-    if [ ! -d /etc/tomcat6/webapps/pidsvc-latest.war ]; then cd $TOMCAT_HOME/webapps;
-    wget https://cgsrv1.arrc.csiro.au/swrepo/PidService/jenkins/trunk/pidsvc-latest.war; chown -R tomcat6:tomcat6 $TOMCAT_HOME; fi;";
+    shell.inline = "
+      export TOMCAT_HOME='/var/lib/tomcat6';
+      if [ ! -d $TOMCAT_HOME/webapps/pidsvc.war ]; then 
+        cd $TOMCAT_HOME/webapps;
+        wget https://cgsrv1.arrc.csiro.au/swrepo/PidService/jenkins/trunk/pidsvc-latest.war;
+        mv pidsvc-latest.war pidsvc.war; 
+        chown -R tomcat6:tomcat6 $TOMCAT_HOME; 
+      fi;";
   end
 
   config.vm.provision :shell do |shell|
     shell.args = ENV['pgpass'];
-    shell.inline = "export PGPASSWORD=$1;
-    cd /vagrant/public;
-    if [ ! -d /home/vagrant/.pgpass ]; then echo 'localhost:5432:pidsvc:pidsvc-admin:vagrant' > /home/vagrant/.pgpass ; chown vagrant:vagrant /home/vagrant/.pgpass; chmod  0600 /home/vagrant/.pgpass; fi;
-    if [ ! -d /vagrant/public/PID ]; then git svn clone https://www.seegrid.csiro.au/subversion/PID/ -T trunk -b branches -t tags; fi;
-    echo 'createlang\n';
-    createlang -U pidsvc-admin -h localhost plpgsql pidsvc;
-    echo 'Importing sql\n';
-    psql -U pidsvc-admin  -h localhost -d pidsvc -f PID/pidsvc/src/main/db/postgresql.sql";
+    shell.inline =" 
+      export PGPASSWORD=$1;
+      cd /vagrant/public;
+      if [ ! -d /vagrant/public/PID ]; then 
+        git svn clone https://www.seegrid.csiro.au/subversion/PID/ -T trunk -b branches -t tags; 
+      fi;
+      cd /vagrant/public/PID/pidsvc/src/main/db;
+      if [ ! -f /vagrant/public/PID/pidsvc/src/main/db/postgresql.sql.orig]; then
+        echo 'fixing postgresql.sql OWNER value';
+        sed 's/pidsvc-admin/pidsvc/g' postgresql.sql > tmp.sql; 
+        mv postgresql.sql postgresql.sql.orig; 
+        mv tmp.sql postgresql.sql
+      fi;
+      if [ ! -f /vagrant/public/PID/pidsvc/src/main/db/postgresql.sql.orig]; then
+        echo 'fixing createdb.sh OWNER value';
+        sed 's/pidsvc-admin/pidsvc/g' createdb.sh > tmp.sh; 
+        mv createdb.sh createdb.sh.orig; 
+        mv tmp.sh createdb.sh
+      fi;
+      echo 'createlang';
+      createlang -U pidsvc -h localhost plpgsql pidsvc;
+      echo 'Importing sql';
+      psql -U pidsvc  -h localhost -d pidsvc -f PID/pidsvc/src/main/db/postgresql.sql
+      ";
   end
 
 #/etc/tomcat6/Catalina/localhost/pidsvc.xml

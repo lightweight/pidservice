@@ -29,14 +29,9 @@ package { $packages:
 
 class { 'postgresql::server': }
 
-#postgresql::server::role { 'vagrant':
-#  createdb => true,
-#  password_hash => postgresql_password('vagrant', 'vagrant'),
-#}
-
 postgresql::server::db { 'pidsvc':
-  user     => 'pidsvc-admin',
-  password => postgresql_password('pidsvc-admin', 'vagrant'),
+  user     => 'pidsvc',
+  password => postgresql_password('pidsvc', 'vagrant'),
 }
 
 file { "/etc/tomcat6/webapps":
